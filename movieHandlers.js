@@ -1,4 +1,5 @@
 const database = require("./database.js");
+const { body, validationResult } = require("express-validator");
 
 const movies = [
   {
@@ -94,34 +95,22 @@ const updateMovie = (req, res) => {
     });
 };
 
-const validateMovie = (req, res, next) => {
-  const { title, director, year, color, duration } = req.body;
-  const errors = [];
-  const maxLength = 255;
+const validateMovie = [
+  body("title").notEmpty().isLength({ max: 255 }),
+  body("director").notEmpty(),
+  body("year").notEmpty(),
+  body("color").notEmpty(),
+  body("duration").notEmpty(),
+  (req, res, next) => {
+    const errors = validationResult(req);
 
-  if (title == null) {
-    errors.push({ field: "title", message: "This field is required" });
-  } else if (director == null) {
-    errors.push({ field: "director", message: "This field is required" });
-  } else if (year == null) {
-    errors.push({ field: "year", message: "This field is required" });
-  } else if (color == null) {
-    errors.push({ field: "color", message: "This field is required" });
-  } else if (duration == null) {
-    errors.push({ field: "duration", message: "This field is required" });
-  } else if (title.length > maxLength) {
-    errors.push({
-      field: "title",
-      message: "Field length cannot exceed 255 characters",
-    });
-  }
-
-  if (errors.length) {
-    res.status(422).json({ validationErrors: errors });
-  } else {
-    next();
-  }
-};
+    if (!errors.isEmpty()) {
+      res.status(422).json({ validationErrors: errors.array() });
+    } else {
+      next();
+    }
+  },
+];
 
 module.exports = {
   getMovies,

@@ -1,4 +1,5 @@
 const database = require("./database.js");
+const { body, validationResult } = require("express-validator");
 
 const getUsers = (req, res) => {
   database
@@ -67,26 +68,20 @@ const updateUser = (req, res) => {
     });
 };
 
-const validateUser = (req, res, next) => {
-  const { email } = req.body;
-  const errors = [];
+const validateUser = [
+  body("email").isEmail(),
+  body("firstname").isLength({ max: 255 }),
+  body("lastname").isLength({ max: 255 }),
+  (req, res, next) => {
+    const errors = validationResult(req);
 
-  // ...
-
-  const emailRegex = /[a-z0-9._]+@[a-z0-9-]+\.[a-z]{2,3}/;
-
-  if (!emailRegex.test(email)) {
-    errors.push({ field: "email", message: "Invalid email" });
-  }
-
-  // ...
-
-  if (errors.length) {
-    res.status(422).json({ validationErrors: errors });
-  } else {
-    next();
-  }
-};
+    if (!errors.isEmpty()) {
+      res.status(422).json({ validationErrors: errors.array() });
+    } else {
+      next();
+    }
+  },
+];
 
 module.exports = {
   getUsers,

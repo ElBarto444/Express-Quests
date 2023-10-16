@@ -23,12 +23,16 @@ app.put("/api/movies/:id", movieHandlers.validateMovie, movieHandlers.updateMovi
 
 app.post("/api/movies", movieHandlers.validateMovie, movieHandlers.postMovie);
 
+app.delete("/api/movies/:id", movieHandlers.deleteMovie)
+
 app.get("/api/users", userHandlers.getUsers);
 app.get("/api/users/:id", userHandlers.getUserById);
 
 app.put("/api/users/:id", userHandlers.validateUser, userHandlers.updateUser);
 
 app.post("/api/users", userHandlers.validateUser, userHandlers.postUser);
+
+app.delete("/api/users/:id", userHandlers.deleteUser)
 
 app.listen(port, (err) => {
   if (err) {

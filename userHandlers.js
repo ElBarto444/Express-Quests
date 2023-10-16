@@ -83,10 +83,27 @@ const validateUser = [
   },
 ];
 
+const deleteUser = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  database
+    .query("delete from users where id = ?", [id])
+    .then(([users]) => {
+      users[0] != null
+        ? res.status(200).send("User was deleted succesfully")
+        : res.status(404).send("User was not found");
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error while deleting the user");
+    });
+};
+
 module.exports = {
   getUsers,
   getUserById,
   postUser,
   validateUser,
   updateUser,
+  deleteUser,
 };

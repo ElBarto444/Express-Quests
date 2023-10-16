@@ -72,8 +72,61 @@ const postMovie = (req, res) => {
     });
 };
 
+const updateMovie = (req, res) => {
+  const id = parseInt(req.params.id);
+  const { title, director, year, color, duration } = req.body;
+
+  database
+    .query(
+      "update movies set title = ?, director = ?, year = ?, color = ?, duration = ? where id = ?",
+      [title, director, year, color, duration, id]
+    )
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error editing the movie");
+    });
+};
+
+const validateMovie = (req, res, next) => {
+  const { title, director, year, color, duration } = req.body;
+  const errors = [];
+  const maxLength = 255;
+
+  if (title == null) {
+    errors.push({ field: "title", message: "This field is required" });
+  } else if (director == null) {
+    errors.push({ field: "director", message: "This field is required" });
+  } else if (year == null) {
+    errors.push({ field: "year", message: "This field is required" });
+  } else if (color == null) {
+    errors.push({ field: "color", message: "This field is required" });
+  } else if (duration == null) {
+    errors.push({ field: "duration", message: "This field is required" });
+  } else if (title.length > maxLength) {
+    errors.push({
+      field: "title",
+      message: "Field length cannot exceed 255 characters",
+    });
+  }
+
+  if (errors.length) {
+    res.status(422).json({ validationErrors: errors });
+  } else {
+    next();
+  }
+};
+
 module.exports = {
   getMovies,
   getMovieById,
   postMovie,
+  validateMovie,
+  updateMovie,
 };

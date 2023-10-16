@@ -45,8 +45,53 @@ const postUser = (req, res) => {
     });
 };
 
+const updateUser = (req, res) => {
+  const id = parseInt(req.params.id);
+  const { firstname, lastname, email, city, language } = req.body;
+
+  database
+    .query(
+      "update users set firstname = ?, lastname = ?, email = ?, city = ?, language = ? where id = ?",
+      [firstname, lastname, email, city, language, id]
+    )
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error editing the user");
+    });
+};
+
+const validateUser = (req, res, next) => {
+  const { email } = req.body;
+  const errors = [];
+
+  // ...
+
+  const emailRegex = /[a-z0-9._]+@[a-z0-9-]+\.[a-z]{2,3}/;
+
+  if (!emailRegex.test(email)) {
+    errors.push({ field: "email", message: "Invalid email" });
+  }
+
+  // ...
+
+  if (errors.length) {
+    res.status(422).json({ validationErrors: errors });
+  } else {
+    next();
+  }
+};
+
 module.exports = {
   getUsers,
   getUserById,
   postUser,
+  validateUser,
+  updateUser,
 };
